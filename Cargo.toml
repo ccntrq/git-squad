@@ -1,0 +1,20 @@
+[package]
+name = "git-squad"
+version = "0.1.0"
+edition = "2024"
+description = "A tool to manage pair or mob programming co-authors in Git commit messages"
+authors = ["Alexander Pankoff <ccntrq@screenri.de>"]
+
+[dependencies]
+clap = { version = "4.5", features = ["derive"] }
+serde = { version = "1.0", features = ["derive"] }
+serde_yaml = "0.9"
+anyhow = "1.0"
+dirs = "6.0"
+regex = "1.11"
+
+[dev-dependencies]
+assert_cmd = "2.0"
+predicates = "3.1"
+tempfile = "3.19"
+test-case = "3.3"
