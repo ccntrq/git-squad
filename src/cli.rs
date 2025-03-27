@@ -4,7 +4,7 @@ use clap::{Parser, Subcommand};
 
 #[derive(Debug, Parser)]
 #[command(name = "git-squad")]
-#[command(about = "Manage pair or mob programming co-authors in Git commit messages", long_about = None)]
+#[command(about = "Manage co-authors in git commit messages with ease", long_about = None)]
 pub struct Cli {
     #[command(subcommand)]
     command: Option<Command>,
