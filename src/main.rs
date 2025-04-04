@@ -5,14 +5,14 @@ mod git;
 
 use anyhow::{Context, Result};
 use buddy::{Buddies, Buddy};
-use cli::{Cli, Command};
+use cli::{Cli, Command, print_completions};
 use config::ConfigService;
 use std::io::{self, Write};
 
 fn main() -> Result<()> {
     let cli = cli::parse();
 
-    match cli.command() {
+    match cli.get_command() {
         Command::With { alias } => {
             let conf = config::FileConfig {
                 buddies_file: cli.buddies_file.clone(),
@@ -106,6 +106,10 @@ fn main() -> Result<()> {
         Command::List => command_list(&cli)?,
 
         Command::Active => command_active(&cli)?,
+
+        Command::Completions { shell } => {
+            print_completions(shell)
+        },
     }
 
     Ok(())

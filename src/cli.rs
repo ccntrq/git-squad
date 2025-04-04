@@ -1,6 +1,7 @@
-use std::path::PathBuf;
+use std::{io, path::PathBuf};
 
-use clap::{Parser, Subcommand};
+use clap::{CommandFactory, Parser, Subcommand};
+use clap_complete::{Generator, Shell, generate};
 
 #[derive(Debug, Parser)]
 #[command(name = "git-squad")]
@@ -15,9 +16,15 @@ pub struct Cli {
 }
 
 impl Cli {
-    pub fn command(&self) -> Command {
+    pub fn get_command(&self) -> Command {
         self.command.clone().unwrap_or(Command::Info)
     }
+}
+
+pub fn print_completions<G: Generator>(generator: G) {
+    let mut cmd = Cli::command();
+    let name = cmd.get_name().to_string();
+    generate(generator, &mut cmd, name, &mut io::stdout());
 }
 
 #[derive(Debug, Subcommand, Clone)]
@@ -57,6 +64,11 @@ pub enum Command {
 
     /// List active buddies in the current session
     Active,
+
+    /// Generate completions for your shell
+    Completions {
+        shell: Shell,
+    },
 }
 
 pub fn parse() -> Cli {
