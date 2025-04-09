@@ -1,6 +1,6 @@
 # Revision history for git-squad
 
-## 0.2.0 -- XXXX-XX-XX
+## 0.2.0 -- 2025-04-04
 
 ### Features
 
