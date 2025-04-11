@@ -23,7 +23,7 @@ jobs:
         rustup default stable
 
     - name: Cache Dependencies
-      uses: Swatinem/rust-cache@988c164c3d0e93c4dbab36aaf5bbeb77425b2894
+      uses: Swatinem/rust-cache@9d47c6ad4b02e050fd481d890b2ea34778fd09d6
       with:
         key: stable
 
