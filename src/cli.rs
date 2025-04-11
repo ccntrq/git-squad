@@ -1,7 +1,13 @@
 use std::{io, path::PathBuf};
 
+use clap::builder::StyledStr;
 use clap::{CommandFactory, Parser, Subcommand};
-use clap_complete::{Generator, Shell, generate};
+use clap_complete::engine::{ArgValueCompleter, CompletionCandidate};
+use clap_complete::env::Shells;
+use clap_complete::{CompleteEnv, Shell, generate};
+
+use crate::config::ConfigService;
+use crate::config::FileConfig;
 
 #[derive(Debug, Parser)]
 #[command(name = "git-squad")]
@@ -16,15 +22,31 @@ pub struct Cli {
 }
 
 impl Cli {
+    pub fn new() -> Self {
+        CompleteEnv::with_factory(Cli::command).complete();
+        Self::parse()
+    }
+
     pub fn get_command(&self) -> Command {
         self.command.clone().unwrap_or(Command::Info)
     }
 }
 
-pub fn print_completions<G: Generator>(generator: G) {
-    let mut cmd = Cli::command();
-    let name = cmd.get_name().to_string();
-    generate(generator, &mut cmd, name, &mut io::stdout());
+pub fn print_completions(shell: Shell) -> anyhow::Result<()> {
+    print_completions_internal(shell, &mut Cli::command())
+}
+
+fn print_completions_internal(shell: Shell, cmd: &mut clap::Command) -> anyhow::Result<()> {
+    generate(shell, cmd, cmd.get_name().to_string(), &mut io::stdout());
+
+    println!();
+
+    let name = cmd.get_name();
+    if let Some(completer) = Shells::builtins().completer(shell.to_string().as_str()) {
+        completer.write_registration("COMPLETE", name, name, name, &mut io::stdout())?;
+    }
+
+    Ok(())
 }
 
 #[derive(Debug, Subcommand, Clone)]
@@ -32,7 +54,9 @@ pub enum Command {
     /// Add buddies to the current session
     With {
         /// The aliases of the buddies to add
-        #[arg( required = true, num_args = 1..,)]
+        #[arg( required = true,
+               num_args = 1..,
+               add = ArgValueCompleter::new(alias_completer))]
         // TODO: I would rather  use NonEmpty<String> here but clap makes
         // this really cumbersome
         aliases: Vec<String>,
@@ -41,7 +65,9 @@ pub enum Command {
     /// Remove buddies from the current session
     Without {
         /// The aliases of the buddies to remove
-        #[arg( required = true, num_args = 1..,)]
+        #[arg( required = true,
+               num_args = 1..,
+               add = ArgValueCompleter::new(alias_completer))]
         // TODO: I would rather  use NonEmpty<String> here but clap makes
         // this really cumbersome
         aliases: Vec<String>,
@@ -59,6 +85,7 @@ pub enum Command {
     /// Delete a buddy from the list of available buddies
     Forget {
         /// The alias for the buddy to delete
+        #[arg(add = ArgValueCompleter::new(alias_completer))]
         alias: String,
     },
 
@@ -75,6 +102,24 @@ pub enum Command {
     Completions { shell: Shell },
 }
 
-pub fn parse() -> Cli {
-    Cli::parse()
+fn alias_completer(current: &std::ffi::OsStr) -> Vec<CompletionCandidate> {
+    // TODO: support completions with custom buddies_file locations
+    let conf = FileConfig { buddies_file: None };
+
+    if let Ok(buddies) = conf.load_buddies() {
+        let current = current.to_str().unwrap_or_default();
+        return buddies
+            .buddies
+            .iter()
+            .filter(|s| {
+                s.alias.starts_with(current) || s.name.starts_with(current) || s.email.starts_with(current)
+            })
+            .map(|b| {
+                let help = Some(StyledStr::from(b.format_buddy()));
+                CompletionCandidate::new(b.alias.clone()).help(help)
+            })
+            .collect();
+    }
+
+    return vec![];
 }

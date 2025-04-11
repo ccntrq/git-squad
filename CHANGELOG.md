@@ -6,6 +6,7 @@
 
 - allow passing multiple buddies to `with` command
 - allow passing multiple buddies to `without` command
+- add tab completions for buddies aliases
 
 ## 0.2.0 -- 2025-04-04
 

@@ -5,12 +5,12 @@ mod git;
 
 use anyhow::Result;
 use buddy::{Buddies, Buddy};
-use cli::{Cli, Command, print_completions};
+use cli::{print_completions, Cli, Command};
 use config::ConfigService;
 use std::io::{self, Write};
 
 fn main() -> Result<()> {
-    let cli = cli::parse();
+    let cli = Cli::new();
 
     match cli.get_command() {
         Command::With { aliases } => {
@@ -107,7 +107,7 @@ fn main() -> Result<()> {
 
         Command::Active => command_active(&cli)?,
 
-        Command::Completions { shell } => print_completions(shell),
+        Command::Completions { shell } => print_completions(shell)?,
     }
 
     Ok(())
