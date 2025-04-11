@@ -29,16 +29,22 @@ pub fn print_completions<G: Generator>(generator: G) {
 
 #[derive(Debug, Subcommand, Clone)]
 pub enum Command {
-    /// Add a buddy to the current session
+    /// Add buddies to the current session
     With {
-        /// The alias of the buddy to add
-        alias: String,
+        /// The aliases of the buddies to add
+        #[arg( required = true, num_args = 1..,)]
+        // TODO: I would rather  use NonEmpty<String> here but clap makes
+        // this really cumbersome
+        aliases: Vec<String>,
     },
 
-    /// Remove a buddy from the current session
+    /// Remove buddies from the current session
     Without {
-        /// The alias of the buddy to remove
-        alias: String,
+        /// The aliases of the buddies to remove
+        #[arg( required = true, num_args = 1..,)]
+        // TODO: I would rather  use NonEmpty<String> here but clap makes
+        // this really cumbersome
+        aliases: Vec<String>,
     },
 
     /// Remove all buddies from the current session
@@ -66,9 +72,7 @@ pub enum Command {
     Active,
 
     /// Generate completions for your shell
-    Completions {
-        shell: Shell,
-    },
+    Completions { shell: Shell },
 }
 
 pub fn parse() -> Cli {

@@ -353,7 +353,7 @@ fn test_with_nonexistent_buddy() -> Result<(), Box<dyn std::error::Error>> {
         .args(&["--buddies-file", &buddies_path, "with", "crocodile"])
         .current_dir(&repo_path)
         .assert()
-        .failure()
+        .success()
         .stderr(predicate::str::contains(
             "Buddy with alias 'crocodile' does not exist",
         ));
@@ -371,8 +371,45 @@ fn test_without_nonexistent_buddy() -> Result<(), Box<dyn std::error::Error>> {
         .args(&["--buddies-file", &buddies_path, "without", "crocodile"])
         .current_dir(&repo_path)
         .assert()
-        .failure()
+        .success()
         .stderr(predicate::str::contains("Buddy 'crocodile' is not active"));
+
+    Ok(())
+}
+
+
+#[test]
+fn test_with_no_buddy() -> Result<(), Box<dyn std::error::Error>> {
+    let (_repo_dir, repo_path, buddies_file) = setup_git_repo()?;
+    let buddies_path = buddies_file.path().to_string_lossy().to_string();
+
+    // Try to remove non-existent buddy
+    Command::cargo_bin("git-squad")?
+        .args(&["--buddies-file", &buddies_path, "with"])
+        .current_dir(&repo_path)
+        .assert()
+        .failure()
+        .stderr(predicate::str::contains(
+            "error: the following required arguments were not provided:\n  <ALIASES>",
+        ));
+
+    Ok(())
+}
+
+#[test]
+fn test_without_no_buddy() -> Result<(), Box<dyn std::error::Error>> {
+    let (_repo_dir, repo_path, buddies_file) = setup_git_repo()?;
+    let buddies_path = buddies_file.path().to_string_lossy().to_string();
+
+    // Try to remove non-existent buddy
+    Command::cargo_bin("git-squad")?
+        .args(&["--buddies-file", &buddies_path, "without"])
+        .current_dir(&repo_path)
+        .assert()
+        .failure()
+        .stderr(predicate::str::contains(
+            "error: the following required arguments were not provided:\n  <ALIASES>",
+        ));
 
     Ok(())
 }

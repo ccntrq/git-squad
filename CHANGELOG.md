@@ -1,5 +1,12 @@
 # Revision history for git-squad
 
+## 0.3.0 -- UNRELEASED
+
+### Features
+
+- allow passing multiple buddies to `with` command
+- allow passing multiple buddies to `without` command
+
 ## 0.2.0 -- 2025-04-04
 
 ### Features
