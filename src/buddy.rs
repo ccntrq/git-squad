@@ -9,8 +9,12 @@ pub struct Buddy {
 }
 
 impl Buddy {
+    pub fn format_buddy(&self) -> String {
+        format!("{} <{}>", self.name, self.email)
+    }
+
     pub fn format_co_author(&self) -> String {
-        format!("Co-authored-by: {} <{}>", self.name, self.email)
+        format!("Co-authored-by: {}", self.format_buddy())
     }
 }
 

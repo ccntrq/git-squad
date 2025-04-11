@@ -12,6 +12,7 @@ manually edit commit templates.
 - Add and remove co-authors in the current git session
 - Automatically updates your git commit template
 - Simple command-line interface
+- Shell completions for commands and buddies
 
 ## Usage 
 
@@ -21,15 +22,16 @@ Manage co-authors in git commit messages with ease
 Usage: git-squad [OPTIONS] [COMMAND]
 
 Commands:
-  with     Add a buddy to the current session
-  without  Remove a buddy from the current session
-  alone    Remove all buddies from the current session
-  create   Create a new buddy
-  forget   Delete a buddy from the list of available buddies
-  info     List both active and available buddies
-  list     List all available buddies
-  active   List active buddies in the current session
-  help     Print this message or the help of the given subcommand(s)
+  with         Add buddies to the current session
+  without      Remove buddies from the current session
+  alone        Remove all buddies from the current session
+  create       Create a new buddy
+  forget       Delete a buddy from the list of available buddies
+  info         List both active and available buddies
+  list         List all available buddies
+  active       List active buddies in the current session
+  completions  Generate completions for your shell
+  help         Print this message or the help of the given subcommand(s)
 
 Options:
       --buddies-file <BUDDIES_FILE>  Use a custom buddy file instead of ~/.config/git-squad/buddies.yaml
