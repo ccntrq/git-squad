@@ -3,7 +3,7 @@ mod cli;
 mod config;
 mod git;
 
-use anyhow::{Context, Result};
+use anyhow::Result;
 use buddy::{Buddies, Buddy};
 use cli::{Cli, Command, print_completions};
 use config::ConfigService;
@@ -13,27 +13,26 @@ fn main() -> Result<()> {
     let cli = cli::parse();
 
     match cli.get_command() {
-        Command::With { alias } => {
+        Command::With { aliases } => {
             let conf = config::FileConfig {
                 buddies_file: cli.buddies_file.clone(),
             };
             let buddies = conf.load_buddies()?;
 
-            if let Some(buddy) = buddies.get(&alias) {
-                let mut active_buddies = git::get_active_buddies(&buddies)?;
-
-                active_buddies
-                    .add(buddy.clone())
-                    .context(format!("Buddy '{}' is already active", alias))?;
-                git::update_commit_template(&active_buddies)?;
-                println!("Added buddy '{}' to the current session", alias);
-                return Ok(());
+            let mut active_buddies = git::get_active_buddies(&buddies)?;
+            for alias in aliases.iter() {
+                match buddies.get(alias) {
+                    Some(buddy) => match active_buddies.add(buddy.clone()) {
+                        Ok(_) => println!("Added buddy '{}' to the current session", alias),
+                        Err(_) => eprintln!("Buddy '{}' is already active", alias),
+                    },
+                    None => eprintln!("Buddy with alias '{}' does not exist", alias),
+                }
             }
-
-            anyhow::bail!("Buddy with alias '{}' does not exist", alias);
+            git::update_commit_template(&active_buddies)?;
         }
 
-        Command::Without { alias } => {
+        Command::Without { aliases } => {
             let conf = config::FileConfig {
                 buddies_file: cli.buddies_file.clone(),
             };
@@ -41,12 +40,13 @@ fn main() -> Result<()> {
 
             let mut active_buddies = git::get_active_buddies(&buddies)?;
 
-            active_buddies
-                .forget(&alias)
-                .context(format!("Buddy '{}' is not active", alias))?;
-
+            for alias in aliases.iter() {
+                match active_buddies.forget(alias) {
+                    Ok(_) => println!("Removed buddy '{}' from the current session", alias),
+                    Err(_) => eprintln!("Buddy '{}' is not active", alias),
+                };
+            }
             git::update_commit_template(&active_buddies)?;
-            println!("Removed buddy '{}' from the current session", alias);
         }
 
         Command::Alone => {
@@ -107,9 +107,7 @@ fn main() -> Result<()> {
 
         Command::Active => command_active(&cli)?,
 
-        Command::Completions { shell } => {
-            print_completions(shell)
-        },
+        Command::Completions { shell } => print_completions(shell),
     }
 
     Ok(())
