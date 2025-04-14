@@ -119,9 +119,9 @@ pub fn update_commit_template(active_buddies: &Buddies) -> Result<()> {
     if !active_buddies.buddies.is_empty() {
         if !new_content.is_empty() {
             new_content.push('\n');
-            new_content.push('\n');
         }
 
+        new_content.push('\n');
         new_content.push_str(BEGIN_MARKER);
         new_content.push('\n');
 
