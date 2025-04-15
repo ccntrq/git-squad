@@ -13,16 +13,13 @@ body = """
 {% for group, commits in commits | group_by(attribute="group") %}
 ### {{ group | striptags | upper_first }}
 
-    {% for commit in commits %}
-        {%- if commit.scope -%}
-            - *({{commit.scope}})* {% if commit.breaking %}[**breaking**] {% endif %}\
-                {{ commit.message }}{{ self::username(commit=commit) }}\
-                {%- if commit.links %} \
-                    ({% for link in commit.links %}[{{link.text}}]({{link.href}}) {% endfor -%})\
-                {% endif %}
-        {% else -%}
-            - {% if commit.breaking %}[**breaking**] {% endif %}{{ commit.message }}{{ self::username(commit=commit) }}
-        {% endif -%}
+    {% for commit in commits -%}
+         - {% if commit.breaking %}[**breaking**] {% endif %}{% if commit.scope %}(**{{ commit.scope }}**) {% endif %}{{ commit.message }}{{ self::username(commit=commit) }}
+         {% for footer in commit.footers -%}
+           {% if footer.breaking -%}
+             {{["**BREAKING CHANGE**:", footer.value] | join(sep=" ") |indent(first=true, prefix="  ") }}
+           {% endif -%}
+         {% endfor -%}
     {% endfor -%}
 {% endfor %}
 {%- macro username(commit) -%}
