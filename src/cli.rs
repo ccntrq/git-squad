@@ -16,7 +16,7 @@ pub struct Cli {
     #[command(subcommand)]
     command: Option<Command>,
 
-    /// Use a custom buddy file instead of ~/.config/git-squad/buddies.yaml
+    /// Use a custom buddy file instead of ~/.config/git-squad/buddies.toml
     #[arg(long = "buddies-file", global = true)]
     pub buddies_file: Option<PathBuf>,
 }
@@ -100,6 +100,14 @@ pub enum Command {
 
     /// Generate completions for your shell
     Completions { shell: Shell },
+
+    /// Migrate buddies from old yaml format to new toml format
+    MigrateBuddies {
+    /// Optional location of the old buddies file to use instead of
+    /// ~/.config/git-squad/buddies.yaml
+    #[arg(long = "old-buddies-file")]
+    old_buddies_file: Option<PathBuf>,
+    }
 }
 
 fn alias_completer(current: &std::ffi::OsStr) -> Vec<CompletionCandidate> {

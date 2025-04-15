@@ -6,17 +6,45 @@ mod git;
 use anyhow::Result;
 use buddy::{Buddies, Buddy};
 use cli::{Cli, Command, print_completions};
-use config::ConfigService;
-use std::io::{self, Write};
+#[allow(deprecated)]
+use config::{ConfigService, DeprecatedFileConfig, FileConfig};
+use std::{
+    ffi::OsStr,
+    io::{self, Write},
+};
 
+#[allow(clippy::too_many_lines)]
 fn main() -> Result<()> {
     let cli = Cli::new();
 
+    if let Some(buddies_file) = &cli.buddies_file {
+        let ext = buddies_file.extension();
+        if ext == Some(OsStr::new("yaml")) || ext == Some(OsStr::new("yml")) {
+            anyhow::bail!(
+                "Yaml config is deprecated! Please migrate your buddies \
+                file using:
+  $ git squad migrate-buddies {} --buddies-file=/path/to/buddies.toml",
+                buddies_file.display()
+            )
+        }
+    } else {
+        #[allow(deprecated)]
+        let from = config::DeprecatedFileConfig { buddies_file: None };
+        let to = config::FileConfig { buddies_file: None };
+
+        #[allow(deprecated)]
+        if from.get_buddies_file()?.exists() && !to.get_buddies_file()?.exists() {
+            println!("Yaml config deprecated - running migration");
+            migrate_config(&from, &to)?;
+        }
+    }
+
+    let conf = config::FileConfig {
+        buddies_file: cli.buddies_file.clone(),
+    };
+
     match cli.get_command() {
         Command::With { aliases } => {
-            let conf = config::FileConfig {
-                buddies_file: cli.buddies_file.clone(),
-            };
             let buddies = conf.load_buddies()?;
 
             let mut active_buddies = git::get_active_buddies(&buddies)?;
@@ -33,9 +61,6 @@ fn main() -> Result<()> {
         }
 
         Command::Without { aliases } => {
-            let conf = config::FileConfig {
-                buddies_file: cli.buddies_file.clone(),
-            };
             let buddies = conf.load_buddies()?;
 
             let mut active_buddies = git::get_active_buddies(&buddies)?;
@@ -55,9 +80,6 @@ fn main() -> Result<()> {
         }
 
         Command::Create { alias } => {
-            let conf = config::FileConfig {
-                buddies_file: cli.buddies_file.clone(),
-            };
             let mut buddies = conf.load_buddies()?;
 
             if buddies.has(&alias) {
@@ -86,9 +108,6 @@ fn main() -> Result<()> {
         }
 
         Command::Forget { alias } => {
-            let conf = config::FileConfig {
-                buddies_file: cli.buddies_file.clone(),
-            };
             let mut buddies = conf.load_buddies()?;
 
             let mut active_buddies = git::get_active_buddies(&buddies)?;
@@ -103,24 +122,42 @@ fn main() -> Result<()> {
         }
 
         Command::Info => {
-            command_active(&cli)?;
-            command_list(&cli)?;
+            command_active(&conf)?;
+            command_list(&conf)?;
         }
 
-        Command::List => command_list(&cli)?,
+        Command::List => command_list(&conf)?,
 
-        Command::Active => command_active(&cli)?,
+        Command::Active => command_active(&conf)?,
 
         Command::Completions { shell } => print_completions(shell)?,
+
+        Command::MigrateBuddies { old_buddies_file } => {
+            #[allow(deprecated)]
+            let from = config::DeprecatedFileConfig {
+                buddies_file: old_buddies_file.clone(),
+            };
+
+            migrate_config(&from, &conf)?;
+        }
     }
 
     Ok(())
 }
 
-fn command_list(cli: &Cli) -> Result<()> {
-    let conf = config::FileConfig {
-        buddies_file: cli.buddies_file.clone(),
-    };
+#[allow(deprecated)]
+fn migrate_config(from: &DeprecatedFileConfig, to: &FileConfig) -> Result<()> {
+    let old = from.get_buddies_file()?;
+    println!("Migrating {:#?} to {:#?}", old, to.get_buddies_file()?);
+
+    from.migrate(to)?;
+
+    println!("Migration successful");
+
+    Ok(())
+}
+
+fn command_list(conf: &impl ConfigService) -> Result<()> {
     let buddies = conf.load_buddies()?;
 
     if buddies.buddies.is_empty() {
@@ -136,10 +173,7 @@ fn command_list(cli: &Cli) -> Result<()> {
     Ok(())
 }
 
-fn command_active(cli: &Cli) -> Result<()> {
-    let conf = config::FileConfig {
-        buddies_file: cli.buddies_file.clone(),
-    };
+fn command_active(conf: &impl ConfigService) -> Result<()> {
     let buddies = conf.load_buddies()?;
     let active_buddies = git::get_active_buddies(&buddies)?;
 
