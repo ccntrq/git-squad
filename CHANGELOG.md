@@ -1,17 +1,7 @@
-# Revision history for git-squad
+# Changelog
 
-## 0.3.0 -- UNRELEASED
+All notable changes to `git-squad` will be documented in this file.
 
-### Features
-
-- allow passing multiple buddies to `with` command
-- allow passing multiple buddies to `without` command
-- add tab completions for buddies aliases
-
-### Fixes
-
-- always place co-authors in footer section of the commit
-- fail early on duplicate alias in `create` command
 
 ## 0.2.0 -- 2025-04-04
 
