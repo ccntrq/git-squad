@@ -16,7 +16,7 @@ pub struct FileConfig {
 }
 
 impl FileConfig {
-    pub fn get_config_dir(&self) -> Result<PathBuf> {
+    pub fn get_config_dir() -> Result<PathBuf> {
         let home = home_dir().context("Failed to determine home directory")?;
         let config_dir = home.join(".config").join("git-squad");
 
@@ -31,7 +31,7 @@ impl FileConfig {
         Ok(self
             .buddies_file
             .clone()
-            .unwrap_or(self.get_config_dir()?.join("buddies.yaml")))
+            .unwrap_or(FileConfig::get_config_dir()?.join("buddies.yaml")))
     }
 }
 

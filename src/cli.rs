@@ -121,5 +121,5 @@ fn alias_completer(current: &std::ffi::OsStr) -> Vec<CompletionCandidate> {
             .collect();
     }
 
-    return vec![];
+    vec![]
 }

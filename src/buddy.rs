@@ -32,21 +32,16 @@ impl Buddies {
         self.buddies
             .iter()
             .find(|buddy| buddy.alias == alias)
-            .map(|buddy| (buddy))
     }
 
     pub fn has(&self, alias: &str) -> bool {
-        match self.get(alias) {
-            Some(_) => true,
-            None => false,
-        }
+        self.get(alias).is_some()
     }
 
     pub fn get_buddy_by_email(&self, email: &str) -> Option<&Buddy> {
         self.buddies
             .iter()
             .find(|buddy| buddy.email == email)
-            .map(|buddy| (buddy))
     }
 
     pub fn add(&mut self, buddy: Buddy) -> Result<()> {

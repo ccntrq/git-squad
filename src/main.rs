@@ -20,13 +20,13 @@ fn main() -> Result<()> {
             let buddies = conf.load_buddies()?;
 
             let mut active_buddies = git::get_active_buddies(&buddies)?;
-            for alias in aliases.iter() {
+            for alias in &aliases {
                 match buddies.get(alias) {
                     Some(buddy) => match active_buddies.add(buddy.clone()) {
-                        Ok(_) => println!("Added buddy '{}' to the current session", alias),
-                        Err(_) => eprintln!("Buddy '{}' is already active", alias),
+                        Ok(()) => println!("Added buddy '{alias}' to the current session"),
+                        Err(_) => eprintln!("Buddy '{alias}' is already active"),
                     },
-                    None => eprintln!("Buddy with alias '{}' does not exist", alias),
+                    None => eprintln!("Buddy with alias '{alias}' does not exist"),
                 }
             }
             git::update_commit_template(&active_buddies)?;
@@ -40,11 +40,11 @@ fn main() -> Result<()> {
 
             let mut active_buddies = git::get_active_buddies(&buddies)?;
 
-            for alias in aliases.iter() {
+            for alias in &aliases {
                 match active_buddies.forget(alias) {
-                    Ok(_) => println!("Removed buddy '{}' from the current session", alias),
-                    Err(_) => eprintln!("Buddy '{}' is not active", alias),
-                };
+                    Ok(()) => println!("Removed buddy '{alias}' from the current session"),
+                    Err(_) => eprintln!("Buddy '{alias}' is not active"),
+                }
             }
             git::update_commit_template(&active_buddies)?;
         }
@@ -64,13 +64,13 @@ fn main() -> Result<()> {
                 anyhow::bail!("Buddy with alias '{}' already exists", alias)
             }
 
-            print!("Enter name for buddy '{}': ", alias);
+            print!("Enter name for buddy '{alias}': ");
             io::stdout().flush()?;
             let mut name = String::new();
             io::stdin().read_line(&mut name)?;
             name = name.trim().to_string();
 
-            print!("Enter email for buddy '{}': ", alias);
+            print!("Enter email for buddy '{alias}': ");
             io::stdout().flush()?;
             let mut email = String::new();
             io::stdin().read_line(&mut email)?;
@@ -82,7 +82,7 @@ fn main() -> Result<()> {
                 email,
             })?;
             conf.save_buddies(&buddies)?;
-            println!("Created new buddy '{}'", alias);
+            println!("Created new buddy '{alias}'");
         }
 
         Command::Forget { alias } => {
@@ -99,7 +99,7 @@ fn main() -> Result<()> {
             buddies.forget(&alias)?;
             conf.save_buddies(&buddies)?;
 
-            println!("Completly forgot buddy '{}'", alias);
+            println!("Completly forgot buddy '{alias}'");
         }
 
         Command::Info => {

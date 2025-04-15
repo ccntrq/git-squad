@@ -13,7 +13,7 @@ const END_MARKER: &str = "# END GIT-SQUAD";
 
 pub fn get_commit_template_path() -> Result<PathBuf> {
     let output = Command::new("git")
-        .args(&["config", "--get", "commit.template"])
+        .args(["config", "--get", "commit.template"])
         .output()
         .context("Failed to execute git command")?;
 
