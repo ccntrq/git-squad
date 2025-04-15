@@ -16,18 +16,18 @@ fn setup_git_repo() -> Result<(TempDir, String, NamedTempFile), Box<dyn std::err
 
     // Initialize git repository
     Command::new("git")
-        .args(&["init"])
+        .args(["init"])
         .current_dir(repo_path)
         .output()?;
 
     // Configure git user for the test
     Command::new("git")
-        .args(&["config", "user.name", "Test User"])
+        .args(["config", "user.name", "Test User"])
         .current_dir(repo_path)
         .output()?;
 
     Command::new("git")
-        .args(&["config", "user.email", "test@example.com"])
+        .args(["config", "user.email", "test@example.com"])
         .current_dir(repo_path)
         .output()?;
 
@@ -36,7 +36,7 @@ fn setup_git_repo() -> Result<(TempDir, String, NamedTempFile), Box<dyn std::err
     fs::write(&template_path, "Test commit template\n")?;
 
     Command::new("git")
-        .args(&["config", "commit.template", template_path.to_str().unwrap()])
+        .args(["config", "commit.template", template_path.to_str().unwrap()])
         .current_dir(repo_path)
         .output()?;
 
@@ -48,7 +48,7 @@ fn setup_git_repo() -> Result<(TempDir, String, NamedTempFile), Box<dyn std::err
 // Helper function to read commit template content
 fn read_commit_template(repo_path: &str) -> Result<String, Box<dyn std::error::Error>> {
     let output = Command::new("git")
-        .args(&["config", "--get", "commit.template"])
+        .args(["config", "--get", "commit.template"])
         .current_dir(repo_path)
         .output()?;
 
@@ -67,7 +67,7 @@ fn test_create_and_list_buddy() -> Result<(), Box<dyn std::error::Error>> {
 
     // Create a new buddy with simulated input
     let mut cmd = Command::cargo_bin("git-squad")?;
-    cmd.args(&["--buddies-file", &buddies_path, "create", "peter"])
+    cmd.args(["--buddies-file", &buddies_path, "create", "peter"])
         .current_dir(&repo_path);
 
     let mut child = cmd.stdin(Stdio::piped()).stdout(Stdio::piped()).spawn()?;
@@ -82,7 +82,7 @@ fn test_create_and_list_buddy() -> Result<(), Box<dyn std::error::Error>> {
 
     // List buddies and check that Peter appears
     let assert = Command::cargo_bin("git-squad")?
-        .args(&["--buddies-file", &buddies_path, "list"])
+        .args(["--buddies-file", &buddies_path, "list"])
         .current_dir(&repo_path)
         .assert();
 
@@ -100,7 +100,7 @@ fn test_with_and_active() -> Result<(), Box<dyn std::error::Error>> {
 
     // Create a buddy
     let mut cmd = Command::cargo_bin("git-squad")?;
-    cmd.args(&["--buddies-file", &buddies_path, "create", "wendy"])
+    cmd.args(["--buddies-file", &buddies_path, "create", "wendy"])
         .current_dir(&repo_path);
 
     let mut child = cmd.stdin(Stdio::piped()).stdout(Stdio::piped()).spawn()?;
@@ -113,7 +113,7 @@ fn test_with_and_active() -> Result<(), Box<dyn std::error::Error>> {
 
     // Add buddy to active session
     let assert = Command::cargo_bin("git-squad")?
-        .args(&["--buddies-file", &buddies_path, "with", "wendy"])
+        .args(["--buddies-file", &buddies_path, "with", "wendy"])
         .current_dir(&repo_path)
         .assert();
 
@@ -123,7 +123,7 @@ fn test_with_and_active() -> Result<(), Box<dyn std::error::Error>> {
 
     // Check active buddies
     let assert = Command::cargo_bin("git-squad")?
-        .args(&["--buddies-file", &buddies_path, "active"])
+        .args(["--buddies-file", &buddies_path, "active"])
         .current_dir(&repo_path)
         .assert();
 
@@ -147,7 +147,7 @@ fn test_without_buddy() -> Result<(), Box<dyn std::error::Error>> {
 
     // Create a buddy
     let mut cmd = Command::cargo_bin("git-squad")?;
-    cmd.args(&["--buddies-file", &buddies_path, "create", "hook"])
+    cmd.args(["--buddies-file", &buddies_path, "create", "hook"])
         .current_dir(&repo_path);
 
     let mut child = cmd.stdin(Stdio::piped()).stdout(Stdio::piped()).spawn()?;
@@ -160,7 +160,7 @@ fn test_without_buddy() -> Result<(), Box<dyn std::error::Error>> {
 
     // Add buddy to active session
     let assert = Command::cargo_bin("git-squad")?
-        .args(&["--buddies-file", &buddies_path, "with", "hook"])
+        .args(["--buddies-file", &buddies_path, "with", "hook"])
         .current_dir(&repo_path)
         .assert();
 
@@ -172,7 +172,7 @@ fn test_without_buddy() -> Result<(), Box<dyn std::error::Error>> {
 
     // Remove buddy from session
     let assert = Command::cargo_bin("git-squad")?
-        .args(&["--buddies-file", &buddies_path, "without", "hook"])
+        .args(["--buddies-file", &buddies_path, "without", "hook"])
         .current_dir(&repo_path)
         .assert();
 
@@ -194,7 +194,7 @@ fn test_alone_command() -> Result<(), Box<dyn std::error::Error>> {
 
     // Create two buddies
     let mut cmd = Command::cargo_bin("git-squad")?;
-    cmd.args(&["--buddies-file", &buddies_path, "create", "peter"])
+    cmd.args(["--buddies-file", &buddies_path, "create", "peter"])
         .current_dir(&repo_path);
 
     let mut child = cmd.stdin(Stdio::piped()).stdout(Stdio::piped()).spawn()?;
@@ -205,7 +205,7 @@ fn test_alone_command() -> Result<(), Box<dyn std::error::Error>> {
     child.wait_with_output()?;
 
     let mut cmd = Command::cargo_bin("git-squad")?;
-    cmd.args(&["--buddies-file", &buddies_path, "create", "wendy"])
+    cmd.args(["--buddies-file", &buddies_path, "create", "wendy"])
         .current_dir(&repo_path);
 
     let mut child = cmd.stdin(Stdio::piped()).stdout(Stdio::piped()).spawn()?;
@@ -217,13 +217,13 @@ fn test_alone_command() -> Result<(), Box<dyn std::error::Error>> {
 
     // Add both buddies to active session
     Command::cargo_bin("git-squad")?
-        .args(&["--buddies-file", &buddies_path, "with", "peter"])
+        .args(["--buddies-file", &buddies_path, "with", "peter"])
         .current_dir(&repo_path)
         .assert()
         .success();
 
     Command::cargo_bin("git-squad")?
-        .args(&["--buddies-file", &buddies_path, "with", "wendy"])
+        .args(["--buddies-file", &buddies_path, "with", "wendy"])
         .current_dir(&repo_path)
         .assert()
         .success();
@@ -235,7 +235,7 @@ fn test_alone_command() -> Result<(), Box<dyn std::error::Error>> {
 
     // Run alone command
     Command::cargo_bin("git-squad")?
-        .args(&["--buddies-file", &buddies_path, "alone"])
+        .args(["--buddies-file", &buddies_path, "alone"])
         .current_dir(&repo_path)
         .assert()
         .success()
@@ -259,7 +259,7 @@ fn test_forget_buddy() -> Result<(), Box<dyn std::error::Error>> {
 
     // Create a buddy
     let mut cmd = Command::cargo_bin("git-squad")?;
-    cmd.args(&["--buddies-file", &buddies_path, "create", "hook"])
+    cmd.args(["--buddies-file", &buddies_path, "create", "hook"])
         .current_dir(&repo_path);
 
     let mut child = cmd.stdin(Stdio::piped()).stdout(Stdio::piped()).spawn()?;
@@ -271,14 +271,14 @@ fn test_forget_buddy() -> Result<(), Box<dyn std::error::Error>> {
 
     // Add buddy to active session
     Command::cargo_bin("git-squad")?
-        .args(&["--buddies-file", &buddies_path, "with", "hook"])
+        .args(["--buddies-file", &buddies_path, "with", "hook"])
         .current_dir(&repo_path)
         .assert()
         .success();
 
     // Forget buddy
     Command::cargo_bin("git-squad")?
-        .args(&["--buddies-file", &buddies_path, "forget", "hook"])
+        .args(["--buddies-file", &buddies_path, "forget", "hook"])
         .current_dir(&repo_path)
         .assert()
         .success()
@@ -286,7 +286,7 @@ fn test_forget_buddy() -> Result<(), Box<dyn std::error::Error>> {
 
     // Verify buddy is gone from list
     Command::cargo_bin("git-squad")?
-        .args(&["--buddies-file", &buddies_path, "list"])
+        .args(["--buddies-file", &buddies_path, "list"])
         .current_dir(&repo_path)
         .assert()
         .success()
@@ -306,7 +306,7 @@ fn test_info_command() -> Result<(), Box<dyn std::error::Error>> {
 
     // Create a buddy
     let mut cmd = Command::cargo_bin("git-squad")?;
-    cmd.args(&["--buddies-file", &buddies_path, "create", "peter"])
+    cmd.args(["--buddies-file", &buddies_path, "create", "peter"])
         .current_dir(&repo_path);
 
     let mut child = cmd.stdin(Stdio::piped()).stdout(Stdio::piped()).spawn()?;
@@ -318,14 +318,14 @@ fn test_info_command() -> Result<(), Box<dyn std::error::Error>> {
 
     // Add buddy to active session
     Command::cargo_bin("git-squad")?
-        .args(&["--buddies-file", &buddies_path, "with", "peter"])
+        .args(["--buddies-file", &buddies_path, "with", "peter"])
         .current_dir(&repo_path)
         .assert()
         .success();
 
     // Run info command
     Command::cargo_bin("git-squad")?
-        .args(&["--buddies-file", &buddies_path, "info"])
+        .args(["--buddies-file", &buddies_path, "info"])
         .current_dir(&repo_path)
         .assert()
         .success()
@@ -350,7 +350,7 @@ fn test_with_nonexistent_buddy() -> Result<(), Box<dyn std::error::Error>> {
 
     // Try to add non-existent buddy
     Command::cargo_bin("git-squad")?
-        .args(&["--buddies-file", &buddies_path, "with", "crocodile"])
+        .args(["--buddies-file", &buddies_path, "with", "crocodile"])
         .current_dir(&repo_path)
         .assert()
         .success()
@@ -368,7 +368,7 @@ fn test_without_nonexistent_buddy() -> Result<(), Box<dyn std::error::Error>> {
 
     // Try to remove non-existent buddy
     Command::cargo_bin("git-squad")?
-        .args(&["--buddies-file", &buddies_path, "without", "crocodile"])
+        .args(["--buddies-file", &buddies_path, "without", "crocodile"])
         .current_dir(&repo_path)
         .assert()
         .success()
@@ -385,7 +385,7 @@ fn test_with_no_buddy() -> Result<(), Box<dyn std::error::Error>> {
 
     // Try to remove non-existent buddy
     Command::cargo_bin("git-squad")?
-        .args(&["--buddies-file", &buddies_path, "with"])
+        .args(["--buddies-file", &buddies_path, "with"])
         .current_dir(&repo_path)
         .assert()
         .failure()
@@ -403,7 +403,7 @@ fn test_without_no_buddy() -> Result<(), Box<dyn std::error::Error>> {
 
     // Try to remove non-existent buddy
     Command::cargo_bin("git-squad")?
-        .args(&["--buddies-file", &buddies_path, "without"])
+        .args(["--buddies-file", &buddies_path, "without"])
         .current_dir(&repo_path)
         .assert()
         .failure()
@@ -421,7 +421,7 @@ fn test_create_duplicate_buddy() -> Result<(), Box<dyn std::error::Error>> {
 
     // Create a buddy
     let mut cmd = Command::cargo_bin("git-squad")?;
-    cmd.args(&["--buddies-file", &buddies_path, "create", "peter"])
+    cmd.args(["--buddies-file", &buddies_path, "create", "peter"])
         .current_dir(&repo_path);
 
     let mut child = cmd.stdin(Stdio::piped()).stdout(Stdio::piped()).spawn()?;
@@ -433,7 +433,7 @@ fn test_create_duplicate_buddy() -> Result<(), Box<dyn std::error::Error>> {
 
     // Try to create a buddy with the same alias
     let mut cmd = Command::cargo_bin("git-squad")?;
-    cmd.args(&["--buddies-file", &buddies_path, "create", "peter"])
+    cmd.args(["--buddies-file", &buddies_path, "create", "peter"])
         .current_dir(&repo_path);
 
     let child = cmd
@@ -447,8 +447,7 @@ fn test_create_duplicate_buddy() -> Result<(), Box<dyn std::error::Error>> {
     assert!(!output.status.success());
     assert!(
         error_output.contains("Buddy with alias 'peter' already exists"),
-        "Expected error message about duplicate buddy, got: {}",
-        error_output
+        "Expected error message about duplicate buddy, got: {error_output}"
     );
 
     Ok(())

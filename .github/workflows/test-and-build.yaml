@@ -19,13 +19,16 @@ jobs:
     - name: Setup rust
       run: |
         rustup update --no-self-update stable
-        rustup component add --toolchain stable rustfmt rust-src
+        rustup component add --toolchain stable rustfmt rust-src clippy
         rustup default stable
 
     - name: Cache Dependencies
       uses: Swatinem/rust-cache@9d47c6ad4b02e050fd481d890b2ea34778fd09d6
       with:
         key: stable
+
+    - name: Lint code
+      run: cargo clippy
 
     - name: Run unit tests
       run: cargo test --bins
