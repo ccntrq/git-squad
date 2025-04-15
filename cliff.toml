@@ -1,0 +1,69 @@
+[changelog]
+header = """
+# Changelog\n
+All notable changes to `git-squad` will be documented in this file.\n
+"""
+body = """
+
+## [{{ version | trim_start_matches(pat="v") }}]\
+    {%- if release_link -%}\
+        ({{ release_link }})\
+    {% endif %} \
+    - {{ timestamp | date(format="%Y-%m-%d") }}
+{% for group, commits in commits | group_by(attribute="group") %}
+### {{ group | striptags | upper_first }}
+
+    {% for commit in commits %}
+        {%- if commit.scope -%}
+            - *({{commit.scope}})* {% if commit.breaking %}[**breaking**] {% endif %}\
+                {{ commit.message }}{{ self::username(commit=commit) }}\
+                {%- if commit.links %} \
+                    ({% for link in commit.links %}[{{link.text}}]({{link.href}}) {% endfor -%})\
+                {% endif %}
+        {% else -%}
+            - {% if commit.breaking %}[**breaking**] {% endif %}{{ commit.message }}{{ self::username(commit=commit) }}
+        {% endif -%}
+    {% endfor -%}
+{% endfor %}
+{%- macro username(commit) -%}
+    {% if commit.remote.username and not commit.remote.username == 'ccntrq' %}(thanks @{{ commit.remote.username }}){% endif -%}
+{% endmacro -%}
+\n\n
+"""
+trim = true
+# postprocessors
+postprocessors = [
+  { pattern = "\\(#([0-9]+)\\)", replace = "([#${1}](https://github.com/ccntrq/git-squad/issues/${1}))"}
+]
+[git]
+conventional_commits = true
+filter_unconventional = true
+split_commits = false
+commit_preprocessors = [
+  # Replace issue numbers
+  #{ pattern = '\((\w+\s)?#([0-9]+)\)', replace = "([#${2}](<REPO>/issues/${2}))"},
+  # Check spelling of the commit with https://github.com/crate-ci/typos
+  # If the spelling is incorrect, it will be automatically fixed.
+  #{ pattern = '.*', replace_command = 'typos --write-changes -' },
+]
+commit_parsers = [
+  { message = "^feat", group = "<!-- 0 -->⛰️ Features" },
+  { message = "^fix", group = "<!-- 1 -->🐛 Bug Fixes" },
+  { message = "^doc", group = "<!-- 3 -->📚 Documentation" },
+  { message = "^perf", group = "<!-- 4 -->⚡ Performance" },
+  { message = "^refactor\\(clippy\\)", skip = true },
+  { message = "^refactor", group = "<!-- 2 -->🚜 Refactor" },
+  { message = "^style", group = "<!-- 5 -->🎨 Styling" },
+  { message = "^test", group = "<!-- 6 -->🧪 Testing" },
+  { message = "^chore\\(release\\): prepare for", skip = true },
+  { message = "^chore\\(deps.*\\)", skip = true },
+  { message = "^chore\\(pr\\)", skip = true },
+  { message = "^chore\\(pull\\)", skip = true },
+  { message = "^chore|^ci", skip = true },
+  { body = ".*security", group = "<!-- 8 -->🛡️ Security" },
+  { message = "^revert", group = "<!-- 9 -->◀️ Revert" },
+  { message = ".*", skip = true },
+]
+filter_commits = false
+topo_order = false
+sort_commits = "oldest"
