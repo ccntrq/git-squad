@@ -5,7 +5,7 @@ mod git;
 
 use anyhow::Result;
 use buddy::{Buddies, Buddy};
-use cli::{print_completions, Cli, Command};
+use cli::{Cli, Command, print_completions};
 use config::ConfigService;
 use std::io::{self, Write};
 
@@ -59,6 +59,10 @@ fn main() -> Result<()> {
                 buddies_file: cli.buddies_file.clone(),
             };
             let mut buddies = conf.load_buddies()?;
+
+            if buddies.has(&alias) {
+                anyhow::bail!("Buddy with alias '{}' already exists", alias)
+            }
 
             print!("Enter name for buddy '{}': ", alias);
             io::stdout().flush()?;
