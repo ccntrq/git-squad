@@ -11,6 +11,7 @@
 ### Fixes
 
 - always place co-authors in footer section of the commit
+- fail early on duplicate alias in `create` command
 
 ## 0.2.0 -- 2025-04-04
 

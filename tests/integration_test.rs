@@ -436,15 +436,11 @@ fn test_create_duplicate_buddy() -> Result<(), Box<dyn std::error::Error>> {
     cmd.args(&["--buddies-file", &buddies_path, "create", "peter"])
         .current_dir(&repo_path);
 
-    let mut child = cmd
+    let child = cmd
         .stdin(Stdio::piped())
         .stdout(Stdio::piped())
         .stderr(Stdio::piped())
         .spawn()?;
-    {
-        let mut stdin = child.stdin.take().expect("Failed to open stdin");
-        stdin.write_all(b"Another Peter\nanother@neverland.com\n")?;
-    }
 
     let output = child.wait_with_output()?;
     let error_output = String::from_utf8_lossy(&output.stderr);
