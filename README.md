@@ -16,6 +16,8 @@ manually edit commit templates.
 
 ## Usage 
 
+<img alt="git-squad demo tape" src="https://github.com/ccntrq/git-squad/blob/master/assets/demo.gif" width="600" />
+
 ```
 Manage co-authors in git commit messages with ease
 
