@@ -126,11 +126,7 @@ pub fn update_commit_template(active_buddies: &Buddies) -> Result<()> {
 
   // Add our section with co-authors if needed
   if !active_buddies.buddies.is_empty() {
-    if !new_content.is_empty() {
-      new_content.push('\n');
-    }
-
-    new_content.push('\n');
+    new_content.push_str("\n\n");
     new_content.push_str(BEGIN_MARKER);
     new_content.push('\n');
 
