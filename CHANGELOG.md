@@ -3,6 +3,12 @@
 All notable changes to `git-squad` will be documented in this file.
 
 
+## [0.3.1](https://github.com/ccntrq/git-squad/compare/v0.3.0...v0.3.1) - 2025-04-17
+
+### 📚 Documentation
+
+- make demo tape gif show on crates.io ([#20](https://github.com/ccntrq/git-squad/issues/20))
+
 ## [0.3.0](https://github.com/ccntrq/git-squad/compare/v0.2.0...v0.3.0) - 2025-04-15
 
 ### ⛰️ Features
