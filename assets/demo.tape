@@ -13,7 +13,7 @@ Set Shell fish
 Hide
 Type "cd $(mktemp -d -t git-squad.XXXX)"
 Enter
-Type "mv ~/.config/git-squad/buddies.yaml ~/.config/git-squad/buddies.yaml.bup"
+Type "mv ~/.config/git-squad/buddies.toml ~/.config/git-squad/buddies.toml.bup"
 Enter
 Type "git-squad alone"
 Enter
@@ -83,7 +83,7 @@ Sleep 500ms
 Type "git commit"
 Enter
 Escape
-Type "O"
+Type "i"
 Type "work on file with peter and wendy"
 Escape
 Sleep 500ms
@@ -95,7 +95,8 @@ Enter
 Sleep 5s
 
 Hide
-Type "mv ~/.config/git-squad/buddies.yaml.bup ~/.config/git-squad/buddies.yaml"
+Type "mv ~/.config/git-squad/buddies.toml.bup ~/.config/git-squad/buddies.toml"
 Enter
 Type "git-squad alone"
 Enter
+Sleep 3s
