@@ -3,6 +3,12 @@
 All notable changes to `git-squad` will be documented in this file.
 
 
+## [0.3.3](https://github.com/ccntrq/git-squad/compare/v0.3.2...v0.3.3) - 2025-04-17
+
+### 🐛 Bug Fixes
+
+- place Co-Authors in footer section ([#23](https://github.com/ccntrq/git-squad/issues/23))
+
 ## [0.3.2](https://github.com/ccntrq/git-squad/compare/v0.3.1...v0.3.2) - 2025-04-17
 
 ### 📚 Documentation
