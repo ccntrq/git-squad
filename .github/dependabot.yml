@@ -2,6 +2,11 @@ version: 2
 updates:
   - package-ecosystem: 'cargo'
     directory: '/'
+    groups:
+      production-dependencies:
+        dependency-type: 'production'
+      development-dependencies:
+        dependency-type: 'development'
     schedule:
       interval: 'daily'
       time: '09:00'
