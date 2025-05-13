@@ -1,3 +1,5 @@
+use std::fmt::Display;
+
 use anyhow::Result;
 use serde::{Deserialize, Serialize};
 
@@ -17,6 +19,12 @@ impl Buddy {
 
   pub fn format_co_author(&self) -> String {
     format!("Co-authored-by: {}", self.format_buddy())
+  }
+}
+
+impl Display for Buddy {
+  fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+    write!(f, "{}", self.format_buddy())
   }
 }
 

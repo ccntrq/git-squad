@@ -13,6 +13,8 @@ use buddy::{Buddies, Buddy};
 use cli::{Cli, Command, print_completions};
 #[allow(deprecated)]
 use config::{ConfigService, DeprecatedFileConfig, FileConfig};
+use inquire::MultiSelect;
+use nonempty::NonEmpty;
 
 #[allow(clippy::too_many_lines)]
 fn main() -> Result<()> {
@@ -46,33 +48,80 @@ fn main() -> Result<()> {
   match cli.get_command() {
     Command::With { aliases } => {
       let buddies = conf.load_buddies()?;
-
       let mut active_buddies = git::get_active_buddies(&buddies)?;
-      for alias in &aliases {
-        match buddies.get(alias) {
-          Some(buddy) => match active_buddies.add(buddy.clone()) {
-            Ok(()) => println!("Added buddy '{alias}' to the current session"),
-            Err(_) => eprintln!("Buddy '{alias}' is already active"),
-          },
-          None => eprintln!("Buddy with alias '{alias}' does not exist"),
-        }
+      let inactive_buddies = buddies
+        .buddies
+        .iter()
+        .filter(|b| !active_buddies.buddies.contains(b))
+        .collect();
+
+      let buddies_to_activate = if aliases.is_empty() {
+        buddies_select(
+          NonEmpty::from_vec(inactive_buddies).map_or_else(
+            || anyhow::bail!("All buddies are already active!"),
+            Ok,
+          )?,
+          "add to the current session",
+        )
+      } else {
+        aliases
+          .iter()
+          .filter_map(|alias| {
+            buddies.get(alias).or_else(|| {
+              eprintln!("Buddy with alias '{alias}' does not exist");
+              None
+            })
+          })
+          .collect()
+      };
+
+      for buddy in buddies_to_activate {
+        active_buddies.add(buddy.clone()).map_or_else(
+          |_| eprintln!("Buddy '{}' is already active", buddy.alias),
+          |()| println!("Added buddy '{}' to the current session", buddy.alias),
+        );
       }
       git::update_commit_template(&active_buddies)?;
     }
 
     Command::Without { aliases } => {
       let buddies = conf.load_buddies()?;
-
       let mut active_buddies = git::get_active_buddies(&buddies)?;
+      let active_buddies_list = active_buddies.buddies.clone();
 
-      for alias in &aliases {
-        match active_buddies.forget(alias) {
-          Ok(()) => {
-            println!("Removed buddy '{alias}' from the current session")
-          }
-          Err(_) => eprintln!("Buddy '{alias}' is not active"),
-        }
+      let buddies_to_deactivate = if aliases.is_empty() {
+        buddies_select(
+          NonEmpty::from_vec(active_buddies_list.iter().collect())
+            .map_or_else(
+              || anyhow::bail!("No active buddies in the current session!"),
+              Ok,
+            )?,
+          "remove from the current session",
+        )
+      } else {
+        aliases
+          .iter()
+          .filter_map(|alias| {
+            buddies.get(alias).or_else(|| {
+              eprintln!("Buddy with alias '{alias}' does not exist");
+              None
+            })
+          })
+          .collect()
+      };
+
+      for buddy in &buddies_to_deactivate {
+        active_buddies.forget(&buddy.alias).map_or_else(
+          |_| eprintln!("Buddy '{}' is not active", buddy.alias),
+          |()| {
+            println!(
+              "Removed buddy '{}' from the current session",
+              buddy.alias
+            );
+          },
+        );
       }
+
       git::update_commit_template(&active_buddies)?;
     }
 
@@ -190,4 +239,20 @@ fn command_active(conf: &impl ConfigService) -> Result<()> {
   }
 
   Ok(())
+}
+
+fn buddies_select<'a>(
+  buddies: NonEmpty<&'a Buddy>,
+  purpose: &str,
+) -> Vec<&'a Buddy> {
+  let buddies_vec: Vec<&Buddy> = buddies.into_iter().collect();
+
+  let selections = MultiSelect::new(
+    &format!("Choose one or more buddies to {purpose}"),
+    buddies_vec,
+  )
+  .prompt()
+  .unwrap_or_else(|_| vec![]);
+
+  selections
 }

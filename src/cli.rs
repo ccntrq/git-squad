@@ -66,22 +66,14 @@ pub enum Command {
   /// Add buddies to the current session
   With {
     /// The aliases of the buddies to add
-    #[arg( required = true,
-               num_args = 1..,
-               add = ArgValueCompleter::new(alias_completer))]
-    // TODO: I would rather  use NonEmpty<String> here but clap makes
-    // this really cumbersome
+    #[arg(add = ArgValueCompleter::new(alias_completer))]
     aliases: Vec<String>,
   },
 
   /// Remove buddies from the current session
   Without {
     /// The aliases of the buddies to remove
-    #[arg( required = true,
-               num_args = 1..,
-               add = ArgValueCompleter::new(alias_completer))]
-    // TODO: I would rather  use NonEmpty<String> here but clap makes
-    // this really cumbersome
+    #[arg(add = ArgValueCompleter::new(alias_completer))]
     aliases: Vec<String>,
   },
 
