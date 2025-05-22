@@ -3,17 +3,14 @@ mod cli;
 mod config;
 mod git;
 
-use std::{
-  ffi::OsStr,
-  io::{self, Write},
-};
+use std::ffi::OsStr;
 
 use anyhow::Result;
 use buddy::{Buddies, Buddy};
 use cli::{Cli, Command, print_completions};
 #[allow(deprecated)]
 use config::{ConfigService, DeprecatedFileConfig, FileConfig};
-use inquire::MultiSelect;
+use inquire::{MultiSelect, Text};
 use nonempty::NonEmpty;
 
 #[allow(clippy::too_many_lines)]
@@ -137,17 +134,10 @@ fn main() -> Result<()> {
         anyhow::bail!("Buddy with alias '{}' already exists", alias)
       }
 
-      print!("Enter name for buddy '{alias}': ");
-      io::stdout().flush()?;
-      let mut name = String::new();
-      io::stdin().read_line(&mut name)?;
-      name = name.trim().to_string();
-
-      print!("Enter email for buddy '{alias}': ");
-      io::stdout().flush()?;
-      let mut email = String::new();
-      io::stdin().read_line(&mut email)?;
-      email = email.trim().to_string();
+      let name =
+        Text::new(&format!("Enter name for buddy '{alias}':")).prompt()?;
+      let email =
+        Text::new(&format!("Enter email for buddy '{alias}': ")).prompt()?;
 
       buddies.add(Buddy {
         alias: alias.clone(),
