@@ -3,6 +3,18 @@
 All notable changes to `git-squad` will be documented in this file.
 
 
+## [0.3.3](https://github.com/ccntrq/git-squad/compare/v0.3.2...v0.3.3) - 2025-05-22
+
+### ⛰️ Features
+
+- add multiselect menu for `with` and `without` command ([#35](https://github.com/ccntrq/git-squad/issues/35))
+- reimplement integration test suite ([#38](https://github.com/ccntrq/git-squad/issues/38))
+- improved prompts for create command ([#39](https://github.com/ccntrq/git-squad/issues/39))
+
+### 🐛 Bug Fixes
+
+- place Co-Authors in footer section ([#23](https://github.com/ccntrq/git-squad/issues/23))
+
 ## [0.3.2](https://github.com/ccntrq/git-squad/compare/v0.3.1...v0.3.2) - 2025-04-17
 
 ### 📚 Documentation
