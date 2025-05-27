@@ -9,6 +9,7 @@ manually edit commit templates.
 ## Features
 
 - Maintain a list of collaborators (buddies) with their names and emails
+- Import buddies from a repositories history
 - Add and remove co-authors in the current git session
 - Automatically updates your git commit template
 - Simple command-line interface
@@ -27,6 +28,7 @@ Commands:
   with             Add buddies to the current session
   without          Remove buddies from the current session
   alone            Remove all buddies from the current session
+  import           Import buddies from the current repo history
   create           Create a new buddy
   forget           Delete a buddy from the list of available buddies
   info             List both active and available buddies

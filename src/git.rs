@@ -1,4 +1,5 @@
 use std::{
+  fmt::Display,
   fs::File,
   io::{Read, Write},
   path::PathBuf,
@@ -6,6 +7,7 @@ use std::{
 };
 
 use anyhow::{Context, Result};
+use itertools::Itertools;
 use regex::Regex;
 
 use crate::buddy::Buddies;
@@ -33,6 +35,47 @@ pub fn get_commit_template_path() -> Result<PathBuf> {
     .to_string();
 
   Ok(PathBuf::from(path_str))
+}
+
+#[derive(Debug)]
+pub struct Author {
+  pub name: String,
+  pub email: String,
+}
+
+impl Display for Author {
+  fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+    write!(f, "{} <{}>", self.name, self.email)
+  }
+}
+
+fn parse_author(input: &str) -> Option<Author> {
+  if let (Some(start), Some(end)) = (input.find('<'), input.find('>')) {
+    let name = input[1..start].trim().to_string();
+    let email = input[start + 1..end].trim().to_string();
+    Some(Author { name, email })
+  } else {
+    None
+  }
+}
+
+pub fn get_authors() -> Result<Vec<Author>> {
+  let output = Command::new("git")
+    .args(["log", "--all", "--format='%aN <%aE>'"])
+    .output()
+    .context("Failed to execute git command")?;
+
+  if !output.status.success() {
+    anyhow::bail!("FAIL")
+  }
+
+  let authors = String::from_utf8(output.stdout)?
+    .lines()
+    .unique()
+    .filter_map(parse_author)
+    .collect();
+
+  Ok(authors)
 }
 
 pub fn get_active_buddies(buddies: &Buddies) -> Result<Buddies> {

@@ -1,3 +1,4 @@
+mod alias;
 mod buddy;
 mod cli;
 mod config;
@@ -5,12 +6,17 @@ mod git;
 
 use std::ffi::OsStr;
 
-use anyhow::Result;
+use alias::suggest_alias;
+use anyhow::{Context, Result};
 use buddy::{Buddies, Buddy};
 use cli::{Cli, Command, print_completions};
 #[allow(deprecated)]
 use config::{ConfigService, DeprecatedFileConfig, FileConfig};
-use inquire::{MultiSelect, Text};
+use git::{Author, get_authors};
+use inquire::{
+  CustomUserError, MultiSelect, Text,
+  validator::{StringValidator, Validation},
+};
 use nonempty::NonEmpty;
 
 #[allow(clippy::too_many_lines)]
@@ -125,6 +131,52 @@ fn main() -> Result<()> {
     Command::Alone => {
       git::update_commit_template(&Buddies::default())?;
       println!("Removed all buddies from the current session");
+    }
+
+    Command::Import => {
+      println!("Importing buddies from repo history");
+      let mut buddies = conf.load_buddies()?;
+      let authors = get_authors()?;
+      let suggestions = authors
+        .iter()
+        .filter(|author| {
+          !buddies
+            .buddies
+            .iter()
+            .any(|buddy| buddy.email == author.email)
+        })
+        .collect();
+
+      let authors_to_import = authors_select(
+        NonEmpty::from_vec(suggestions).context("No new buddies to suggest")?,
+        "import",
+      );
+
+      for author in &authors_to_import {
+        let aliases: Vec<String> = buddies
+          .buddies
+          .clone()
+          .iter()
+          .map(|b| b.alias.clone())
+          .collect();
+        let validator = AliasValidator {
+          aliases: aliases.clone(),
+        };
+
+        let default_alias = suggest_alias(&author.name, &aliases);
+        let alias = Text::new(&format!("Enter alias for {author}"))
+          .with_default(&default_alias)
+          .with_validator(validator)
+          .prompt()?;
+
+        buddies.add(Buddy {
+          name: author.name.clone(),
+          email: author.email.clone(),
+          alias: alias.clone(),
+        })?;
+      }
+
+      conf.save_buddies(&buddies)?;
     }
 
     Command::Create { alias } => {
@@ -245,4 +297,38 @@ fn buddies_select<'a>(
   .unwrap_or_else(|_| vec![]);
 
   selections
+}
+
+fn authors_select<'a>(
+  authors: NonEmpty<&'a Author>,
+  purpose: &str,
+) -> Vec<&'a Author> {
+  let buddies_vec: Vec<&Author> = authors.into_iter().collect();
+
+  let selections = MultiSelect::new(
+    &format!("Choose one or more authors to {purpose}"),
+    buddies_vec,
+  )
+  .prompt()
+  .unwrap_or_else(|_| vec![]);
+
+  selections
+}
+
+#[derive(Clone)]
+struct AliasValidator {
+  aliases: Vec<String>,
+}
+
+impl StringValidator for AliasValidator {
+  fn validate(
+    &self,
+    alias: &str,
+  ) -> std::result::Result<Validation, CustomUserError> {
+    if self.aliases.contains(&alias.to_owned()) {
+      Ok(Validation::Invalid("Alias already in use".into()))
+    } else {
+      Ok(Validation::Valid)
+    }
+  }
 }

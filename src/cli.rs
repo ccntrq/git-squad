@@ -80,6 +80,9 @@ pub enum Command {
   /// Remove all buddies from the current session
   Alone,
 
+  /// Import buddies from the current repo history
+  Import,
+
   /// Create a new buddy
   Create {
     /// The alias for the new buddy
